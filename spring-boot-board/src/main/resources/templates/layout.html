@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link rel="stylesheet" type="text/css" th:href="@{/bootstrap-5.3.2-dist/css/bootstrap.min.css}">
+<title>스프링부트 게시판</title>
+</head>
+<body>
+<!-- 내비게이션 바 -->
+<nav th:replace="~{navbar :: navbar-fragment}"></nav>
+<!-- 기본 템플릿 안에 삽입될 내용 -->
+<th:block layout:fragment="content"></th:block>
+
+<!-- 부트스트랩 js -->
+<scrip th:src="@{/bootstrap-5.3.2-dist/js/bootstrap.min.js}"></scrip>
+<!-- 자바스크립트 -->
+<th:block layout:fragment="script"></th:block>
+</body>
+</html>

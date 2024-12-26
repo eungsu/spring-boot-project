@@ -1,0 +1,123 @@
+<html layout:decorate="~{layout}">
+<div layout:fragment="content" class="container my-3">
+	<!-- 게시글 -->
+	<div class="row mb-3">
+		<div class="col-12">
+			<table class="table">
+				<colgroup>
+					<col width="15%">
+					<col width="35%">
+					<col width="15%">
+					<col width="35%">
+				</colgroup>
+				<tbody>
+					<tr>
+						<th>제목</th>
+						<td>
+							<span th:text="${post.title}"></span>
+							<span class="text-danger small ms-2"
+								th:if="${#lists.size(post.replies) > 0}"
+								th:text="${#lists.size(post.replies)}"></span>
+						</td>
+						<th>작성자</th>
+						<td th:text="${post.author.username}"></td>
+					</tr>
+					<tr>
+						<th>등록일자</th>
+						<td th:text="${#temporals.format(post.createdDate, 'yyyy년 M월 d일')}"></td>
+						<th>수정일자</th>
+						<td th:text="${#temporals.format(post.updatedDate, 'yyyy년 M월 d일')}"></td>
+					</tr>
+					<tr>
+						<th>내용</th>
+						<td colspan="3" style="white-space: pre-line;" th:utext="${@commonUtil.markdown(post.content)}"></td>
+					</tr>
+				</tbody>
+			</table>
+			<div>
+				<a th:href="@{|/post/vote/${post.id}|}" class="recommed btn btn-sm btn-outline-secondary">
+					추천
+					<span class="badge rounded-fill bg-success" th:text="${#lists.size(post.postVoters)}"></span>
+				</a>
+				<a th:href="@{|/post/modify/${post.id}|}" class="btn btn-sm btn-outline-secondary"
+                	sec:authorize="isAuthenticated()"
+                	th:if="${#authentication.getPrincipal().getUsername() == post.author.username}"
+                	th:text="수정"></a>
+				<a th:href="@{|/post/delete/${post.id}|}" class="delete btn btn-sm btn-outline-secondary"
+                	sec:authorize="isAuthenticated()"
+                	th:if="${#authentication.getPrincipal().getUsername() == post.author.username}"
+                	th:text="삭제"></a>
+			</div>
+		</div>		
+	</div>
+	<!-- 댓글 -->
+	<div class="row mb-3">
+		<div class="col-12">
+			<div class="card my-3" th:each="reply : ${post.replies}" id="card-replies">
+				<div class="card-body py-1 px-2">
+					<a th:id="|reply_${reply.id}|"></a>
+					<div class="d-flex justify-content-between">
+						<div>
+							<span class="badge bg-light text-dark" th:text="${post.author.username}"></span>
+							<span class="badge bg-light text-dark" th:text="${#temporals.format(reply.createdDate, 'yyyy년 M월 d일')}"></span>							
+						</div>
+						<div>
+							<div>
+								<a th:href="@{|/reply/vote/${reply.id}|}" class="recommed btn btn-sm btn-outline-secondary">
+									추천
+									<span class="badge rounded-fill bg-success" th:text="${#lists.size(reply.replyVoters)}"></span>
+								</a>
+								<a th:href="@{|/reply/modify/${reply.id}|}" class="btn btn-sm btn-outline-secondary"
+				                	sec:authorize="isAuthenticated()"
+				                	th:if="${#authentication.getPrincipal().getUsername() == reply.author.username}"
+				                	th:text="수정"></a>
+								<a th:href="@{|/reply/delete/${reply.id}|}" class="delete btn btn-sm btn-outline-secondary" 
+				                	sec:authorize="isAuthenticated()"
+				                	th:if="${#authentication.getPrincipal().getUsername() == reply.author.username}"
+				                	th:text="삭제"></a>
+							</div>
+						</div>
+					</div>
+					<p class="card-text ps-2" style="white-space: pre-line;" th:utext="${@commonUtil.markdown(reply.content)}"></p>
+				</div>
+			</div>
+			
+			<form sec:authorize="isAuthenticated()" class="mb-3 border p-3" method="post" 
+				th:action="@{|/reply/create/${post.id}|}" 
+				th:object="${replyForm}">
+				<div th:replace="~{/form-errors :: form-errors-fragment}"></div>
+				<div class="row g-3">
+					<div class="col-12 position-relative" >
+						<textarea class="form-control border-0" th:field="*{content}" rows="3"></textarea>
+						<button type="submit" class="btn btn-outline-dark btn-sm position-absolute" style="bottom: 15px; right: 25px;">댓글등록</button>
+					</div>					
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+<script layout:fragment="script" type="text/javascript">
+	document.querySelectorAll(".delete ").forEach((element) => {
+		element.addEventListener('click', (event) => {
+			event.preventDefault();
+			let result = confirm("삭제하시겠습니까?");
+			if (result) {
+				location.href = event.target.getAttribute('href');
+			}
+		});
+	});	
+	document.querySelectorAll(".recommed ").forEach((element) => {
+		element.addEventListener('click', (event) => {
+			event.preventDefault();
+			let result = confirm("추천하시겠습니까?");
+			if (result) {
+				let href = event.target.getAttribute('href');
+				if (!href) {
+					href = event.target.parentElement.getAttribute('href');
+				}
+				location.href = href;
+			}
+		});
+	});	
+</script>
+</html>
