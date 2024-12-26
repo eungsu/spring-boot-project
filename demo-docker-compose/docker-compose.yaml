@@ -1,0 +1,35 @@
+services:
+  db:
+    container_name: mysql_db
+    image: 'mysql:latest'
+    environment:
+      - 'MYSQL_ROOT_PASSWORD=1234'
+      - 'MYSQL_DATABASE=mydb'
+      - 'MYSQL_USER=user'
+      - 'MYSQL_PASSWORD=1234'
+    ports:
+      - '3306'
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - backend-network
+  app:
+    container_name: todo_app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql_db:3306/mydb
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: 1234
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - backend-network
+    restart: on-failure
+volumes:
+  mysql_data:
+networks:
+  backend-network:
